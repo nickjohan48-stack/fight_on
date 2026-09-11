@@ -15,7 +15,42 @@ npm run build      # production build in dist/
 
 No backend is required to play online: the shipped client uses **peer-to-peer WebRTC
 data channels** (PeerJS public broker for rendezvous only — all gameplay traffic is
-direct P2P, host-authoritative).
+direct P2P, host-authoritative). **Deploying the static build alone gives you a live,
+playable-online game** — matchmaking works through the free public PeerJS broker over
+HTTPS.
+
+## Publish online
+
+The client is a static site (`npm run build` → `dist/`). Pick any static host:
+
+**Vercel (recommended)** — `vercel.json` is already configured.
+1. Push this folder to a GitHub repo (`.gitignore` included).
+2. vercel.com → *New Project* → import the repo. Framework auto-detects Vite;
+   build `npm run build`, output `dist` (both pre-set). Deploy. Done in ~1 min.
+
+**Netlify** — `netlify.toml` is already configured (incl. SPA rewrite).
+1. app.netlify.com → *Add new site* → *Import from Git* (or drag-and-drop the `dist/`
+   folder onto the dashboard for an instant manual deploy).
+
+**Cloudflare Pages** — dash.cloudflare.com → *Workers & Pages* → *Create* → connect repo,
+build `npm run build`, output `dist`.
+
+**Manual / any host (incl. itch.io):** run `npm run build`, then upload/serve the whole
+`dist/` folder. Any HTTPS static host works.
+
+Notes:
+- Serve at the **root of a domain/subdomain** (all options above do this). GitHub Pages
+  *project subpaths* would additionally need `base: './'` in `vite.config.js`.
+- WebRTC requires HTTPS — every host above provides it automatically.
+- Two players just need the URL; private room codes also let a friend join from any
+  other device/network.
+
+### Optional: deploy the authoritative server
+
+For production-grade anti-cheat (server owns movement, damage, health, results), run
+`server/index.js` on any Node host (Render → *Web Service*, Railway, Fly.io):
+start command `node index.js`, port `8787`, then `cd server && npm install` first.
+The P2P client works without it; it's the transport-agnostic upgrade path.
 
 ### Testing multiplayer on one machine
 
